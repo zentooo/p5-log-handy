@@ -5,9 +5,27 @@ use warnings;
 
 use parent qw/Log::Handy::Output/;
 
+use Data::Validator;
+
+__PACKAGE__->mk_accessors(qw/validator/);
+
+
+sub new {
+    my ($class, $opts) = @_;
+
+    $opts->{validator} = Data::Validator->new(
+        min_level => +{ isa => "Str", optional => 1 },
+        max_level => +{ isa => "Str", optional => 1 },
+        log_to => +{ isa => "Str" }
+    );
+
+    $class->SUPER::new($opts);
+}
 
 sub log {
     my ($self, $level, $message, $options) = @_;
+
+    $self->validator->validate($options);
 
     if ( $options->{log_to} eq "STDOUT" ) {
         print STDOUT $message;

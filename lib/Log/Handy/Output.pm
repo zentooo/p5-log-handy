@@ -43,7 +43,7 @@ sub call {
         my $runtime_options = ref $args->[-1] eq 'HASH' ? pop @$args : undef;
 
         # override global options with runtime options if there are
-        my $options = $runtime_options ? clone_merge($self->opts, $runtime_options) : $self->opts;
+        my $options = $runtime_options ? clone_merge($self->opts, $runtime_options) : clone_merge($self->opts);
 
         my $environment = clone_merge($env);
 

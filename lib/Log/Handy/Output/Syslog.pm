@@ -5,7 +5,10 @@ use warnings;
 
 use parent qw/Log::Handy::Output/;
 
+use Data::Validator;
 use Sys::Syslog qw/openlog syslog closelog/;
+
+__PACKAGE__->mk_accessors(qw/validator/);
 
 my %LEVEL_MAP = (
     warn => "warning",
@@ -14,8 +17,28 @@ my %LEVEL_MAP = (
     emergency => "emerg",
 );
 
+
+sub new {
+    my ($class, $opts) = @_;
+
+    $opts->{validator} = Data::Validator->new(
+        min_level => +{ isa => "Str", optional => 1 },
+        max_level => +{ isa => "Str", optional => 1 },
+        ident => +{ isa => "Str" },
+        logopt => +{ isa => "Str" },
+        facility => +{ isa => "Str" },
+    );
+
+    $class->SUPER::new($opts);
+}
+
 sub log {
     my ($self, $level, $message, $options) = @_;
+
+    $options->{logopt} ||= "nowait,pid";
+    $options->{facility} ||= "user";
+
+    $self->validator->validate($options);
 
     eval {
         openlog($options->{ident}, $options->{logopt}, $options->{facility});

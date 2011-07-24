@@ -3,6 +3,8 @@ use strict;
 use Test::More;
 use Test::Output;
 
+use File::Temp qw/tempfile/;
+
 use Log::Handy;
 
 
@@ -107,6 +109,31 @@ subtest("level_alias", sub {
     stdout_like {
         $log->fatal("foo");
     } qr/foo/, "we can call fatal method as critical";
+});
+
+subtest("load", sub {
+    my ($fh, $tempfile) = tempfile( SUFFIX => ".pl" );
+    note $tempfile;
+
+    print $fh <<CONF;
++{
+    outputs => +{
+        screen => +{
+            log_to => "STDOUT",
+            min_level => "warn",
+            max_level => "critical",
+        }
+    }
+}
+CONF
+
+    close $fh;
+
+    my $log = Log::Handy->load($tempfile);
+
+    stdout_like {
+        $log->warn("foo");
+    } qr/foo/, "we can load conf from file";
 });
 
 done_testing;

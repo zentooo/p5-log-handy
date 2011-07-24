@@ -5,11 +5,22 @@ use warnings;
 
 use parent qw/Log::Handy::Output/;
 
-__PACKAGE__->mk_accessors(qw/fh_pool/);
+use Data::Validator;
+
+__PACKAGE__->mk_accessors(qw/validator fh_pool/);
 
 
 sub new {
     my ($class, $opts) = @_;
+
+    $opts->{validator} = Data::Validator->new(
+        min_level => +{ isa => "Str", optional => 1 },
+        max_level => +{ isa => "Str", optional => 1 },
+        mode => +{ isa => "Str" },
+        filename => +{ isa => "Str" },
+        close_after_write => +{ isa => "Bool", optional => 1 },
+        level_dispatch => +{ isa => "Bool", optional => 1 },
+    );
 
     $opts->{fh_pool} = +{};
 
@@ -19,13 +30,17 @@ sub new {
 sub log {
     my ($self, $level, $message, $options, $time) = @_;
 
+    $options->{mode} ||= ">>";
+
+    $self->validator->validate($options);
+
     my $filename = $self->_resolve_filename($level, $options, $time);
     my $fh = $self->_get_handle($filename, $options);
 
-    print $fh $message or warn "Cannot write to '$filename': $!";
+    print $fh $message or die "Cannot write to '$filename': $!";
 
     if ( $options->{close_after_write} ) {
-        close $fh or warn "Cannot close '$filename': $!";
+        close $fh or die "Cannot close '$filename': $!";
     }
 }
 
@@ -47,14 +62,13 @@ sub _get_handle {
         }
     }
 
-
     return $fh;
 }
 
 sub _open {
     my ($self, $filename, $options) = @_;
 
-    open my $fh, $options->{mode}, $filename or warn "Cannot open '$filename': $!";
+    open my $fh, $options->{mode}, $filename or die "Cannot open '$filename': $!";
 
     if ( $options->{binmode} ) {
         binmode $fh, $options->{binmode};
@@ -82,10 +96,11 @@ sub _resolve_filename {
     return $filename;
 }
 
+
 sub DESTROY {
     my $self = shift;
     for my $filename (keys %{$self->fh_pool}) {
-        close $self->fh_pool->{$filename} or warn "Cannot close '$filename': $!";
+        close $self->fh_pool->{$filename} or die "Cannot close '$filename': $!";
     }
 }
 

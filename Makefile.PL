@@ -26,8 +26,23 @@ use inc::Module::Install;
 
 all_from 'lib/Log/Handy.pm';
 
+requires 'Class::Load';
+requires 'Class::Accessor::Fast';
+requires 'String::RewritePrefix';
+requires 'Data::Dump';
+requires 'Data::Util';
+requires 'Time::Piece';
+requires 'Config::Any';
+requires 'Data::Validator';
+requires 'Sys::Hostname';
+requires 'Hash::Merge::Simple';
 
 test_requires 'Test::More'     => '0.88';
+test_requires 'Test::Exception';
+test_requires 'Test::Output';
+test_requires 'Data::Util';
+test_requires 'File::Temp';
+test_requires 'Time::Piece';
 test_requires 'Test::Requires' => '0.06';
 
 auto_set_repository;

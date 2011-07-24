@@ -136,14 +136,14 @@ sub load {
     croak $! unless ( -f $config_file && -r $config_file );
 
     my $config = eval {
-        Config::Any->load_files( +{ files => [$config_file], use_ext => 1 } );
+        Config::Any->load_files( +{ files => [$config_file], use_ext => 1, flatten_to_hash => 1 } );
     };
     if ( $@ ) {
         my $e = $@;
         croak $e;
     }
 
-    $class->new($config->[0]);
+    $class->new($config->{$config_file});
 }
 
 
