@@ -54,7 +54,7 @@ sub call {
 
         my $formatted = $self->_format_message($level, $message, $environment, $options);
 
-        $self->log($level, $formatted, $options, $time);
+        $self->log($level, "$formatted\n", $options, $time);
     }
 }
 
@@ -80,7 +80,6 @@ sub _join_args {
             push @results, $dump_sub->($arg);
         }
     }
-    push @results, "\n";
 
     return join $separator, @results;
 }

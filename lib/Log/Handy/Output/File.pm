@@ -5,20 +5,62 @@ use warnings;
 
 use parent qw/Log::Handy::Output/;
 
+__PACKAGE__->mk_accessors(qw/fh_pool/);
+
+
+sub new {
+    my ($class, $opts) = @_;
+
+    $opts->{fh_pool} = +{};
+
+    $class->SUPER::new($opts);
+}
 
 sub log {
     my ($self, $level, $message, $options, $time) = @_;
 
     my $filename = $self->_resolve_filename($level, $options, $time);
+    my $fh = $self->_get_handle($filename, $options);
 
-    open my $fh, $options->{mode}, $filename or warn "Cannot open '$options->{filename}': $!";
+    print $fh $message or warn "Cannot write to '$filename': $!";
+
+    if ( $options->{close_after_write} ) {
+        close $fh or warn "Cannot close '$filename': $!";
+    }
+}
+
+sub _get_handle {
+    my ($self, $filename, $options) = @_;
+
+    my $fh;
+
+    if ( $options->{close_after_write} ) {
+        $fh = $self->_open($filename, $options);
+    }
+    else {
+        if ( exists $self->fh_pool->{$filename} ) {
+            $fh = $self->fh_pool->{$filename};
+        }
+        else {
+            $fh = $self->_open($filename, $options);
+            $self->fh_pool->{$filename} = $fh;
+        }
+    }
+
+
+    return $fh;
+}
+
+sub _open {
+    my ($self, $filename, $options) = @_;
+
+    open my $fh, $options->{mode}, $filename or warn "Cannot open '$filename': $!";
 
     if ( $options->{binmode} ) {
         binmode $fh, $options->{binmode};
     }
 
-    print $fh $message or warn "Cannot write to '$options->{filename}': $!";
-    close $fh;
+    return $fh;
 }
 
 sub _resolve_filename {
@@ -26,16 +68,25 @@ sub _resolve_filename {
 
     my $filename = $options->{filename};
 
-    if ( $filename =~ /%D\{(.*?)\}/ ) {
+    if ( $filename =~ /%T\{(.*?)\}/ ) {
         my $formatted = $time->strftime($1);
-        $filename =~ s/%D\{.*?\}/$formatted/;
+        $filename =~ s/%T\{.*?\}/$formatted/;
     }
 
-    if ( $options->{level_dispatch} ) {
-        $filename =~ s/%l/$level/ if $filename =~ /%l/;
+    if ( $filename =~ /%l/ ) {
+        $filename =~ s/%l/$level/;
     }
+
+    $filename =~ s/%%/%/g;
 
     return $filename;
+}
+
+sub DESTROY {
+    my $self = shift;
+    for my $filename (keys %{$self->fh_pool}) {
+        close $self->fh_pool->{$filename} or warn "Cannot close '$filename': $!";
+    }
 }
 
 
