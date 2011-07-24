@@ -56,17 +56,12 @@ BEGIN {
 
 
 sub new {
-    my ($class, $opts) = @_;
-
-    my $global_options;
-
-    if ( ref $opts->{global} eq 'HASH' ) {
-        $opts->{global} = $global_options = $opts->{global};
-    }
+    my $class = shift;
+    my $opts = ref $_[0] ? $_[0] : +{@_};
 
     if ( ref $opts->{outputs} eq 'HASH' ) {
         my $classes = _load_plugins($opts->{outputs});
-        $opts->{loggers} = _init_plugins($classes, $opts->{outputs}, $global_options);
+        $opts->{loggers} = _init_plugins($classes, $opts->{outputs}, $opts->{global});
     }
     else {
         $opts->{loggers} = [];
@@ -118,9 +113,11 @@ sub _init_plugins {
 }
 
 sub add {
-    my ($self, %outputs) = @_;
-    my $classes = _load_plugins(\%outputs);
-    my $instances = _init_plugins($classes, \%outputs, $self->global);
+    my $self = shift;
+    my $outputs = ref $_[0] ? $_[0] : +{@_};
+
+    my $classes = _load_plugins($outputs);
+    my $instances = _init_plugins($classes, $outputs, $self->global);
     $self->loggers([@{$self->loggers}, @$instances]);
 }
 

@@ -18,7 +18,7 @@ subtest("new", sub {
 });
 
 subtest("new with outputs", sub {
-    my $log = Log::Handy->new(+{
+    my $log = Log::Handy->new(
         outputs => +{
             screen => +{
                 log_to => "STDOUT",
@@ -26,7 +26,7 @@ subtest("new with outputs", sub {
                 max_level => "critical",
             }
         }
-    });
+    );
     isa_ok ( $log->loggers->[0], "Log::Handy::Output::Screen" );
 
     stdout_like {
