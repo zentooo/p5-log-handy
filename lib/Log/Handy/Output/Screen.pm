@@ -14,10 +14,8 @@ sub new {
     my ($class, $opts) = @_;
 
     $opts->{validator} = Data::Validator->new(
-        min_level => +{ isa => "Str", optional => 1 },
-        max_level => +{ isa => "Str", optional => 1 },
         log_to => +{ isa => "Str" }
-    );
+    )->with('AllowExtra');
 
     $class->SUPER::new($opts);
 }

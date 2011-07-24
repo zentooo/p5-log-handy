@@ -14,15 +14,12 @@ sub new {
     my ($class, $opts) = @_;
 
     $opts->{validator} = Data::Validator->new(
-        min_level => +{ isa => "Str", optional => 1 },
-        max_level => +{ isa => "Str", optional => 1 },
         mode => +{ isa => "Str" },
         binmode => +{ isa => "Str", optional => 1 },
         filename => +{ isa => "Str" },
         dirname => +{ isa => "Str", optional => 1 },
         close_after_write => +{ isa => "Bool", optional => 1 },
-        level_dispatch => +{ isa => "Bool", optional => 1 },
-    );
+    )->with('AllowExtra');
 
     $opts->{fh_pool} = +{};
 
