@@ -17,7 +17,9 @@ sub new {
         min_level => +{ isa => "Str", optional => 1 },
         max_level => +{ isa => "Str", optional => 1 },
         mode => +{ isa => "Str" },
+        binmode => +{ isa => "Str", optional => 1 },
         filename => +{ isa => "Str" },
+        dirname => +{ isa => "Str", optional => 1 },
         close_after_write => +{ isa => "Bool", optional => 1 },
         level_dispatch => +{ isa => "Bool", optional => 1 },
     );
@@ -80,7 +82,7 @@ sub _open {
 sub _resolve_filename {
     my ($self, $level, $options, $time) = @_;
 
-    my $filename = $options->{filename};
+    my $filename = $options->{dirname} ? $options->{dirname} . '/' . $options->{filename} : $options->{filename};
 
     if ( $filename =~ /%T\{(.*?)\}/ ) {
         my $formatted = $time->strftime($1);
