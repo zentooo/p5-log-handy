@@ -127,16 +127,16 @@ subtest("merging options", sub {
 
 subtest("format time", sub {
     my $output = Log::Handy::Output->new;
-    my $time1 = $output->_format_time(+{});
+    my ($time1) = $output->_format_time(+{});
     like ( $time1, qr/\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/, "default time format" );
-    my $time2 = $output->_format_time(+{ time_format => "%Y/%m/%d" });
+    my ($time2) = $output->_format_time(+{ time_format => "%Y/%m/%d" });
     like ( $time2, qr!\d\d\d\d/\d\d/\d\d!, "customized time format" );
 });
 
 subtest("join args", sub {
     my $output = Log::Handy::Output->new;
     my $message1 = $output->_join_args(["foo", "bar", "baz"], +{});
-    is ( $message1, "foo bar baz", "strings simply joined" );
+    like ( $message1, qr/foo bar baz/, "strings joined" );
 
     my $message2 = $output->_join_args(["foo", { "bar" => "baz"}], +{});
     note $message2;

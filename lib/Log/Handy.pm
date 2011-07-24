@@ -17,7 +17,7 @@ use Hash::Merge::Simple qw/clone_merge/;
 
 our $VERSION = '0.01';
 
-our %OUTPUT_ALIASES = (
+my %OUTPUT_ALIASES = (
     screen => 'Output::Screen',
     file => 'Output::File',
     syslog => 'Output::Syslog',
@@ -130,8 +130,8 @@ sub level_alias {
     *{$to} = \&$from;
 }
 
-sub load_config {
-    my ($self, $config_file) = @_;
+sub load {
+    my ($class, $config_file) = @_;
 
     croak $! unless ( -f $config_file && -r $config_file );
 
@@ -143,13 +143,9 @@ sub load_config {
         croak $e;
     }
 
-    $self->config($config->[0]);
+    $class->new($config->[0]);
 }
 
-sub config {
-    my ($self, $config) = @_;
-    $self->config($config);
-}
 
 1;
 
@@ -157,7 +153,7 @@ __END__
 
 =head1 NAME"
 
-Log::Handy - Log friendly
+Log::Handy - friendly logger
 
 =head1 VERSION
 

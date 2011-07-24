@@ -46,11 +46,15 @@ sub call {
         my $options = $runtime_options ? clone_merge($self->opts, $runtime_options) : $self->opts;
 
         my $environment = clone_merge($env);
-        $environment->{T} = $self->_format_time($options);
+
+        my $time;
+        ($environment->{T}, $time) = $self->_format_time($options);
+
         my $message = $self->_join_args($args, $options);
+
         my $formatted = $self->_format_message($level, $message, $environment, $options);
 
-        $self->log($level, $formatted, $options);
+        $self->log($level, $formatted, $options, $time);
     }
 }
 
@@ -58,7 +62,7 @@ sub _format_time {
     my ($self, $options) = @_;
     my $time_format = $options->{time_format} ? $options->{time_format} : '%Y-%m-%d %H:%M:%S';
     my $t = Time::Piece::localtime();
-    return $t->strftime($time_format);
+    return ($t->strftime($time_format), $t);
 }
 
 sub _join_args {
@@ -76,6 +80,7 @@ sub _join_args {
             push @results, $dump_sub->($arg);
         }
     }
+    push @results, "\n";
 
     return join $separator, @results;
 }

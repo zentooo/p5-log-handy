@@ -3,11 +3,6 @@ use strict;
 use Test::More;
 use Test::Output;
 
-use Data::Util qw/:check/;
-
-use lib 't/lib';
-use Driver;
-
 BEGIN {
     use_ok 'Log::Handy::Output::Screen';
 }
