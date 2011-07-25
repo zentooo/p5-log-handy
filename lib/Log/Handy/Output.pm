@@ -40,7 +40,7 @@ sub call {
     my $max = $self->opts->{max_level} ? $level_map{$self->opts->{max_level}} : 8;
 
     if ( $min <= $l && $l <= $max ) {
-        my $runtime_options = ref $args->[-1] eq 'HASH' ? pop @$args : undef;
+        my ($args, $runtime_options) = ref $args->[-1] eq 'HASH' ? ([@$args[0 .. scalar @$args - 2]], $args->[-1]) : ($args, undef);
 
         # override global options with runtime options if there are
         my $options = $runtime_options ? clone_merge($self->opts, $runtime_options) : clone_merge($self->opts);
