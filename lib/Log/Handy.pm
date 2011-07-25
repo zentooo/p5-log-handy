@@ -150,7 +150,7 @@ __END__
 
 =head1 NAME"
 
-Log::Handy - friendly logger
+Log::Handy - Dispatch messages to outputs and easy to override config
 
 =head1 VERSION
 
@@ -160,17 +160,78 @@ This document describes Log::Handy version 0.01.
 
     use Log::Handy;
 
+    # initialize with configuration parameters
+
+    my $log = Log::Handy->new(
+        global => +{
+            min_level => 'warn',
+            max_level => 'critical',
+        },
+        outputs => +{
+            screen => +{
+                min_level => 'debug',
+                log_to => 'STDOUT',
+            },
+            file => +{
+                filename => 'myapp_%T{%Y%m%d}.log',
+            },
+            syslog => +{
+                ident => 'myapp',
+                facility => 'user',
+                logopt => 'nowait,pid',
+            }
+        }
+    );
+
+    $log->warn('woofoo!');
+
+
+    # add after initialization
+
+    my $log = Log::Handy->new;
+
+    $log->add(
+        screen => +{
+            min_level => 'warn',
+            log_to => 'STDERR'
+        }
+    );
+
+    $log->add(
+        file => +{
+            dirname => 'path/to/log/directory',
+            filename => 'myapp_%l_%T{%Y%m%d}.log',
+        }
+    );
+
+    $log->critical('hmmmmmm');
+
+
+    # initialize with config file ( perl format recommended )
+
+    my $log = Log::Handy->load('config.pl');
+
+    $log->debug('yeaaaaaaaaah');
+
 =head1 DESCRIPTION
 
-# TODO
+Logging module for:
+Easy to use, easy to write plugins and easy to override configuration at call
 
-=head1 INTERFACE
+=head1 LOG LEVELS
 
-=head2 Functions
+debug < info < notice < warning = warn < error = err < critical = crit < alert < emergency = emerg
 
-=head3 C<< hello() >>
+=head1 LOG LEVEL METHODS
 
-# TODO
+debug()
+info()
+notice()
+warning(), warn()
+error(), err()
+critical(), crit()
+alert()
+emergency(), emerg()
 
 =head1 DEPENDENCIES
 
