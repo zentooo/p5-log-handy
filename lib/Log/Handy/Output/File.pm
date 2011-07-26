@@ -19,6 +19,7 @@ sub new {
         filename => +{ isa => "Str" },
         dirname => +{ isa => "Str", optional => 1 },
         close_after_write => +{ isa => "Bool", optional => 1 },
+        autoflush => +{ isa => "Bool", optional => 1 },
     )->with('AllowExtra');
 
     $opts->{fh_pool} = +{};
@@ -35,6 +36,12 @@ sub log {
 
     my $filename = $self->_resolve_filename($level, $options, $time);
     my $fh = $self->_get_handle($filename, $options);
+
+    if ( $options->{autoflush} ) {
+        my $oldfh = select $fh;
+        $| = 1;
+        select $oldfh;
+    }
 
     print $fh $message or die "Cannot write to '$filename': $!";
 
