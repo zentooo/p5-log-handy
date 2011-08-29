@@ -21,6 +21,7 @@ subtest("new and log", sub {
         max_level => "critical",
         mode => ">>",
         filename => $tempfile,
+        autoflush => 1,
     };
     my $file = Log::Handy::Output::File->new(+{ opts => $opts });
     isa_ok( $file, "Log::Handy::Output::File" );
