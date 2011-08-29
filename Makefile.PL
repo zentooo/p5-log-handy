@@ -45,11 +45,7 @@ test_requires 'File::Temp';
 test_requires 'Time::Piece';
 test_requires 'Test::Requires' => '0.06';
 
-auto_set_repository;
-
 tests_recursive;
-author_tests 'xt';
-
 
 clean_files qw(
     Log-Handy-*
