@@ -26,11 +26,9 @@ use inc::Module::Install;
 
 all_from 'lib/Log/Handy.pm';
 
-requires 'Class::Load';
 requires 'Class::Accessor::Fast';
 requires 'String::RewritePrefix';
 requires 'Data::Dump';
-requires 'Data::Util';
 requires 'Time::Piece';
 requires 'Config::Any';
 requires 'Data::Validator';

@@ -8,7 +8,6 @@ use parent qw/Class::Accessor::Fast/;
 __PACKAGE__->mk_accessors(qw/loggers global/);
 
 use Carp;
-use Class::Load qw/load_class/;
 use String::RewritePrefix;
 use Config::Any;
 use Sys::Hostname;
@@ -80,7 +79,7 @@ sub _load_plugins {
         exists $OUTPUT_ALIASES{$_} ? $OUTPUT_ALIASES{$_} : $_;
     } keys %$outputs);
 
-    load_class($_) for @classes;
+    eval "require $_" for @classes;
     return \@classes;
 }
 

@@ -6,7 +6,6 @@ use warnings;
 use parent qw/Class::Accessor::Fast/;
 
 use Time::Piece ();
-use Data::Util qw/:check/;
 use Data::Dump qw/dump/;
 use Hash::Merge::Simple qw/clone_merge/;
 
@@ -73,12 +72,7 @@ sub _join_args {
     my $separator = $options->{separator} ? $options->{separator} : " ";
 
     for my $arg (@$args) {
-        if ( is_string($arg) || $arg eq "" ) {
-            push @results, $arg;
-        }
-        else {
-            push @results, $dump_sub->($arg);
-        }
+        push @results, $dump_sub->($arg);
     }
 
     return join $separator, @results;

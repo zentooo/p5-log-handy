@@ -136,7 +136,8 @@ subtest("format time", sub {
 subtest("join args", sub {
     my $output = Log::Handy::Output->new;
     my $message1 = $output->_join_args(["foo", "bar", "baz"], +{});
-    like ( $message1, qr/foo bar baz/, "strings joined" );
+    warn dump $message1;
+    like ( $message1, qr/"foo" "bar" "baz"/, "strings joined" );
 
     my $message2 = $output->_join_args(["foo", { "bar" => "baz"}], +{});
     note $message2;
