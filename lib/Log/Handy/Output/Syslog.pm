@@ -25,7 +25,7 @@ sub new {
         ident => +{ isa => "Str" },
         logopt => +{ isa => "Str" },
         facility => +{ isa => "Str" },
-    )->with('AllowExtra');
+    )->with('AllowExtra')->with('NoThrow');
 
     $class->SUPER::new($opts);
 }
@@ -36,7 +36,7 @@ sub log {
     $options->{logopt} ||= "nowait,pid";
     $options->{facility} ||= "user";
 
-    $self->validator->validate($options);
+    $self->_validate($options);
 
     eval {
         openlog($options->{ident}, $options->{logopt}, $options->{facility});

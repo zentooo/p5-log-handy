@@ -15,7 +15,7 @@ sub new {
 
     $opts->{validator} = Data::Validator->new(
         log_to => +{ isa => "Str" }
-    )->with('AllowExtra');
+    )->with('AllowExtra')->with('NoThrow');
 
     $class->SUPER::new($opts);
 }
@@ -23,7 +23,9 @@ sub new {
 sub log {
     my ($self, $level, $message, $options) = @_;
 
-    $self->validator->validate($options);
+    $options->{log_to} ||= "STDOUT";
+
+    $self->_validate($options);
 
     if ( $options->{log_to} eq "STDOUT" ) {
         print STDOUT $message;

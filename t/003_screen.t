@@ -25,9 +25,6 @@ subtest("new and log", sub {
         $screen->log("warn", "foo bar", +{ log_to => "STDERR" });
     } qr/foo bar/, "log emitted to STDERR";
 
-    dies_ok {
-        $screen->log("warn", "foo bar", +{ });
-    } "died because lack of log_to parameter";
 });
 
 done_testing;

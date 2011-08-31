@@ -97,6 +97,17 @@ sub _format_message {
     return $message_format;
 }
 
+sub _validate {
+    my ($self, $options) = @_;
+
+    $self->validator->validate($options);
+
+    if ( $self->validator->has_errors ) {
+        my $errors = $self->validator->clear_errors;
+        die join(", ", map { $_->{message} } @$errors) . " with " . ref $self;
+    }
+}
+
 1;
 __END__
 

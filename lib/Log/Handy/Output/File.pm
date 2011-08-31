@@ -20,7 +20,7 @@ sub new {
         dirname => +{ isa => "Str", optional => 1 },
         close_after_write => +{ isa => "Bool", optional => 1 },
         autoflush => +{ isa => "Bool", optional => 1 },
-    )->with('AllowExtra');
+    )->with('AllowExtra')->with('NoThrow');
 
     $opts->{fh_pool} = +{};
 
@@ -32,7 +32,7 @@ sub log {
 
     $options->{mode} ||= ">>";
 
-    $self->validator->validate($options);
+    $self->_validate($options);
 
     my $filename = $self->_resolve_filename($level, $options, $time);
     my $fh = $self->_get_handle($filename, $options);
