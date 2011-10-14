@@ -44,7 +44,7 @@ subtest("simple call", sub {
             min_level => "debug",
         },
     });
-    $output->call("warn", ["logg"], $sample_env );
+    $output->call("warn", "logg", +{}, $sample_env );
 });
 
 subtest("loglevel filters", sub {
@@ -122,7 +122,7 @@ subtest("merging options", sub {
         },
     });
 
-    $output->call("warn", ["logg", +{ file_name => "override.log" }], $sample_env );
+    $output->call("warn", "logg", +{ file_name => "override.log" }, $sample_env );
 });
 
 subtest("format time", sub {
@@ -131,25 +131,6 @@ subtest("format time", sub {
     like ( $time1, qr/\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/, "default time format" );
     my ($time2) = $output->_format_time(+{ time_format => "%Y/%m/%d" });
     like ( $time2, qr!\d\d\d\d/\d\d/\d\d!, "customized time format" );
-});
-
-subtest("join args", sub {
-    my $output = Log::Handy::Output->new;
-    my $message1 = $output->_join_args(["foo", "bar", "baz"], +{});
-    warn dump $message1;
-    like ( $message1, qr/"foo" "bar" "baz"/, "strings joined" );
-
-    my $message2 = $output->_join_args(["foo", { "bar" => "baz"}], +{});
-    note $message2;
-
-    my $message3 = $output->_join_args(["foo", { "bar" => "baz"}], +{ dump_callback => sub { dump shift; } });
-    note $message3;
-
-    my $message4 = $output->_join_args(["foo", { "bar" => "baz"}], +{
-        dump_callback => sub { dump shift; },
-        separator => ", ",
-    });
-    note $message4;
 });
 
 subtest("format message", sub {

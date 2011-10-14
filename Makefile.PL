@@ -28,7 +28,6 @@ all_from 'lib/Log/Handy.pm';
 
 requires 'Class::Accessor::Fast';
 requires 'String::RewritePrefix';
-requires 'Data::Dump';
 requires 'Time::Piece';
 requires 'Config::Any';
 requires 'Data::Validator';

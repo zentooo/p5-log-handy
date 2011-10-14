@@ -37,10 +37,10 @@ BEGIN {
 
     for my $level (@LEVELS) {
         my $sub = sub {
-            my ($self, @args) = @_;
+            my ($self, $msg, $options) = @_;
             my ($module, $file, $line) = (caller(0))[0, 1, 2];
             for my $logger (@{$self->loggers}) {
-                $logger->call($level, \@args, clone_merge($env, +{
+                $logger->call($level, $msg, $options, clone_merge($env, +{
                      M => $module,
                      F => $file,
                      L => $line,

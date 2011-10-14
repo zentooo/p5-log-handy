@@ -6,7 +6,6 @@ use warnings;
 use parent qw/Class::Accessor::Fast/;
 
 use Time::Piece ();
-use Data::Dump qw/dump/;
 use Hash::Merge::Simple qw/clone_merge/;
 
 __PACKAGE__->mk_accessors(qw/opts/);
@@ -28,10 +27,10 @@ my %level_map = (
 
 
 sub call {
-    my ($self, $level, $args, $env) = @_;
+    my ($self, $level, $msg, $runtime_options, $env) = @_;
 
     if ( ref $self->opts->{suppress_callback} eq "CODE" ) {
-        return if $self->opts->{suppress_callback}->($level, $args, $env);
+        return if $self->opts->{suppress_callback}->($level, $msg, $runtime_options, $env);
     }
 
     my $l = $level_map{$level};
@@ -39,8 +38,6 @@ sub call {
     my $max = $self->opts->{max_level} ? $level_map{$self->opts->{max_level}} : 8;
 
     if ( $min <= $l && $l <= $max ) {
-        my ($args, $runtime_options) = ref $args->[-1] eq 'HASH' ? ([@$args[0 .. scalar @$args - 2]], $args->[-1]) : ($args, undef);
-
         # override global options with runtime options if there are
         my $options = $runtime_options ? clone_merge($self->opts, $runtime_options) : clone_merge($self->opts);
 
@@ -49,9 +46,7 @@ sub call {
         my $time;
         ($environment->{T}, $time) = $self->_format_time($options);
 
-        my $message = $self->_join_args($args, $options);
-
-        my $formatted = $self->_format_message($level, $message, $environment, $options);
+        my $formatted = $self->_format_message($level, $msg, $environment, $options);
 
         $self->log($level, "$formatted\n", $options, $time);
     }
@@ -62,20 +57,6 @@ sub _format_time {
     my $time_format = $options->{time_format} ? $options->{time_format} : '%Y-%m-%d %H:%M:%S';
     my $t = Time::Piece::localtime();
     return ($t->strftime($time_format), $t);
-}
-
-sub _join_args {
-    my ($self, $args, $options) = @_;
-    my @results;
-
-    my $dump_sub = $options->{dump_callback} ? $options->{dump_callback} : sub { dump shift; };
-    my $separator = $options->{separator} ? $options->{separator} : " ";
-
-    for my $arg (@$args) {
-        push @results, $dump_sub->($arg);
-    }
-
-    return join $separator, @results;
 }
 
 sub _format_message {
@@ -89,7 +70,7 @@ sub _format_message {
 
     for my $placeholder (@placeholders) {
         my $value = $env->{substr($placeholder, 1)};
-        $message_format =~ s/$placeholder/$value/;
+        $message_format =~ s/$placeholder/$value/ if defined $value;
     }
 
     $message_format =~ s/%%/%/g;
