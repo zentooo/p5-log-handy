@@ -28,7 +28,7 @@ subtest("new and log", sub {
 
     for my $level (@Log::Handy::LEVELS) {
         my $time = Time::Piece::localtime();
-        $file->log($level, "foo\n", $opts, $time);
+        $file->log($level, $time, "foo\n", +{}, $opts);
     }
 
     while ( my $line = <$fh> ) {
@@ -53,7 +53,7 @@ subtest("log with dirname", sub {
     my $time = Time::Piece::localtime();
 
     lives_ok {
-        $file->log("warn", "foo\n", $opts, $time);
+        $file->log("warn", $time, "foo\n", +{}, $opts);
     } "we can emit logs with dirname";
 });
 
@@ -74,7 +74,7 @@ subtest("log with file format", sub {
     for my $level (@Log::Handy::LEVELS) {
         my $time = Time::Piece::localtime();
         lives_ok {
-            $file->log($level, "foo\n", $opts, $time);
+            $file->log($level, $time, "foo\n", +{}, $opts);
         } "we can emit logs with many names";
     }
 });
@@ -113,19 +113,19 @@ subtest("defalut parameters ant nots", sub {
     my $time = Time::Piece::localtime();
 
     lives_ok {
-        $file->log("warn", "foo\n", $opts1, $time);
+        $file->log("warn", $time, "foo\n", +{}, $opts1);
     } "we can omit mode because it has default value = '>>'";
 
     dies_ok {
-        $file->log("warn", "foo\n", $opts2, $time);
+        $file->log("warn", $time, "foo\n", +{}, $opts2);
     } "we can not omit filename because it does not have default value";
 
     dies_ok {
-        $file->log("warn", "foo\n", $opts3, $time);
+        $file->log("warn", $time, "foo\n", +{}, $opts3);
     } "we can not pass string as level_dispatch";
 
     dies_ok {
-        $file->log("warn", "foo\n", $opts4, $time);
+        $file->log("warn", $time, "foo\n", +{}, $opts4);
     } "we can not pass string as close_after_write";
 });
 

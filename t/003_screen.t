@@ -18,11 +18,11 @@ subtest("new and log", sub {
     isa_ok( $screen, "Log::Handy::Output::Screen" );
 
     stdout_like {
-        $screen->log("warn", "foo bar", +{ log_to => "STDOUT" });
+        $screen->log("warn", undef, "foo bar", +{}, +{ log_to => "STDOUT" });
     } qr/foo bar/, "log emitted to STDOUT";
 
     stderr_like {
-        $screen->log("warn", "foo bar", +{ log_to => "STDERR" });
+        $screen->log("warn", undef, "foo bar", +{}, +{ log_to => "STDERR" });
     } qr/foo bar/, "log emitted to STDERR";
 
 });

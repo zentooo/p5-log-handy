@@ -27,7 +27,7 @@ my %level_map = (
 
 
 sub call {
-    my ($self, $level, $msg, $runtime_options, $env) = @_;
+    my ($self, $level, $msg, $env, $runtime_options) = @_;
 
     if ( ref $self->opts->{suppress_callback} eq "CODE" ) {
         return if $self->opts->{suppress_callback}->($level, $msg, $runtime_options, $env);
@@ -48,7 +48,7 @@ sub call {
 
         my $formatted = $self->_format_message($level, $msg, $environment, $options);
 
-        $self->log($level, "$formatted\n", $options, $time);
+        $self->log($level, $time, "$formatted\n", $environment, $options);
     }
 }
 

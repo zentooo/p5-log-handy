@@ -28,13 +28,13 @@ sub new {
 }
 
 sub log {
-    my ($self, $level, $message, $options, $time) = @_;
+    my ($self, $level, $time, $message, $env, $options) = @_;
 
     $options->{mode} ||= ">>";
 
     $self->_validate($options);
 
-    my $filename = $self->_resolve_filename($level, $options, $time);
+    my $filename = $self->_resolve_filename($level, $time, $options);
     my $fh = $self->_get_handle($filename, $options);
 
     if ( $options->{autoflush} ) {
@@ -84,7 +84,7 @@ sub _open {
 }
 
 sub _resolve_filename {
-    my ($self, $level, $options, $time) = @_;
+    my ($self, $level, $time, $options) = @_;
 
     my $filename = $options->{dirname} ? $options->{dirname} . '/' . $options->{filename} : $options->{filename};
 

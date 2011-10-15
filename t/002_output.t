@@ -27,7 +27,7 @@ subtest("new", sub {
 subtest("simple call", sub {
     my $output = Driver->create("Log::Handy::Output", +{
         log => sub {
-            my ($self, $level, $message, $options) = @_;
+            my ($self, $level, $time, $message, $env, $options) = @_;
 
             ok ( 1, "log method called" );
 
@@ -44,7 +44,7 @@ subtest("simple call", sub {
             min_level => "debug",
         },
     });
-    $output->call("warn", "logg", +{}, $sample_env );
+    $output->call("warn", "logg", $sample_env, +{} );
 });
 
 subtest("loglevel filters", sub {
@@ -95,11 +95,11 @@ subtest("suppress callback", sub {
             }
         },
     });
-    $output->call("warn", ["logg"], $sample_env );
+    $output->call("warn", "logg", $sample_env );
     is ( $called, 0, "log call suppressed!" );
 
     $suppress_flag = 0;
-    $output->call("warn", ["logg"], $sample_env );
+    $output->call("warn", "logg", $sample_env );
     is ( $called, 1, "log call not suppressed" );
 });
 
@@ -108,7 +108,7 @@ subtest("merging options", sub {
 
     my $output = Driver->create("Log::Handy::Output", +{
         log => sub {
-            my ($self, $level, $message, $options) = @_;
+            my ($self, $level, $time, $message, $env, $options) = @_;
             note $message;
             note explain $options;
 
@@ -122,7 +122,7 @@ subtest("merging options", sub {
         },
     });
 
-    $output->call("warn", "logg", +{ file_name => "override.log" }, $sample_env );
+    $output->call("warn", "logg", $sample_env, +{ file_name => "override.log" });
 });
 
 subtest("format time", sub {

@@ -21,7 +21,7 @@ sub new {
 }
 
 sub log {
-    my ($self, $level, $message, $options) = @_;
+    my ($self, $level, $time, $message, $env, $options) = @_;
 
     $options->{log_to} ||= "STDOUT";
 
