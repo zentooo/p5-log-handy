@@ -31,6 +31,7 @@ BEGIN {
         U => getpwuid($<) || $<,
         G =>  getgrgid($( + 0) || $( + 0,
         P => $$,
+        E => $0,
     };
 
     @LEVELS = qw/debug info notice warn warning err error crit critical alert emerg emergency/;
@@ -38,12 +39,13 @@ BEGIN {
     for my $level (@LEVELS) {
         my $sub = sub {
             my ($self, $msg, $options) = @_;
-            my ($module, $file, $line) = (caller(0))[0, 1, 2];
+            my ($module, $file, $line, $subname) = (caller(0))[0, 1, 2, 3];
             for my $logger (@{$self->loggers}) {
                 $logger->call($level, $msg, clone_merge($env, +{
                      M => $module,
                      F => $file,
                      L => $line,
+                     S => $subname,
                 }, $options));
             }
         };
@@ -149,7 +151,7 @@ __END__
 
 =head1 NAME"
 
-Log::Handy - Dispatch messages to outputs and easy to override config
+Log::Handy - Simple and configurable logger
 
 =head1 VERSION
 
@@ -212,10 +214,56 @@ This document describes Log::Handy version 0.01.
 
     $log->debug('yeaaaaaaaaah');
 
-=head1 DESCRIPTION
 
-Logging module for:
-Easy to use, easy to write plugins and easy to override configuration at call
+=head1 OVERRIDE CONFIGURATION
+
+Log::Handy's config is overridden as:
+
+global configuration -> each output's configuration -> runtime configuration
+
+    my $log = Log::Handy->new(
+        global => +{
+            min_level => 'debug',
+            max_level => 'critical',
+        },
+        outputs => +{
+            file => +{
+                min_level => 'warn',
+                filename => 'myapp_%T{%Y%m%d}.log',
+            },
+        }
+    );
+
+In the example above, global configuration value 'min_level' will be overridden with 'min_level' of file output. Additionaly, if you use runtime configuration with second argument of log methods like below: 
+
+    $log->warn("foo", +{ filename => 'myapp_temporary_%T{%Y%m%d}' });
+
+You can override 'filename' configuration value.
+
+
+=head1 WRITE OUTPUT PLUGIN
+
+Log::Handy is desined pluggable and writing output plugins for Log::Handy is so easy. For exam, if you want to write your own plugin, you need to extend Log::Handy::Output and just implement log() method. log() method signature is like this:
+
+    sub log {
+        my ($self, $level, $time, $message, $env, $options) = @_;
+
+        # output process
+    }
+
+$level is log level string like 'warn' or 'critical'. $time is Time::Piece object initialized when each log-level method called, $message is formatted (means each placeholder already replaced) log message, $env is environment hashref like +{ H => <hostname>, P => <process id>, } and $options is hashref that holds configuration variables.
+
+Then you load your plugin like:
+
+    my $log = Log::Handy->new(
+        outputs => +{
+            "+Your::Own::Output::Plugin" => +{
+                min_level => 'warn',
+                your_own_configuration_variable => 'foo'
+            },
+        }
+    );
+
 
 =head1 LOG LEVELS
 
@@ -231,6 +279,7 @@ error(), err()
 critical(), crit()
 alert()
 emergency(), emerg()
+
 
 =head1 DEPENDENCIES
 

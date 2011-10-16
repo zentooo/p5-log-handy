@@ -6,7 +6,7 @@ use warnings;
 use parent qw/Log::Handy::Output/;
 
 use Data::Validator;
-use Sys::Syslog qw/openlog syslog closelog/;
+use Sys::Syslog;
 
 __PACKAGE__->mk_accessors(qw/validator/);
 
@@ -39,9 +39,9 @@ sub log {
     $self->_validate($options);
 
     eval {
-        openlog($options->{ident}, $options->{logopt}, $options->{facility});
-        syslog($self->_level_as_prioity($level), $message);
-        closelog;
+        Sys::Syslog::openlog($options->{ident}, $options->{logopt}, $options->{facility});
+        Sys::Syslog::syslog($self->_level_as_prioity($level), $message);
+        Sys::Syslog::closelog;
     };
     if ( $@ ) {
         my $e = $@;

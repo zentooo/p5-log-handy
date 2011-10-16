@@ -3,6 +3,8 @@ use strict;
 use Test::More;
 use Test::Exception;
 
+use Test::Mock::Guard qw/mock_guard/;
+
 use Log::Handy;
 
 BEGIN {
@@ -17,14 +19,21 @@ subtest("new and log", sub {
         logopt => "ndelay,pid",
         facility => "user",
     };
-    my $screen = Log::Handy::Output::Syslog->new(+{ opts => $opts });
-    isa_ok( $screen, "Log::Handy::Output::Syslog" );
+    my $syslog = Log::Handy::Output::Syslog->new(+{ opts => $opts });
+    isa_ok( $syslog, "Log::Handy::Output::Syslog" );
 
-    #for my $level (@Log::Handy::LEVELS) {
-        #lives_ok {
-            #$screen->log($level, "foo", $opts);
-        #} "$level level syslog output not died";
-    #}
+    my ($level, $msg);
+
+    my $guard = mock_guard("Sys::Syslog", +{
+        openlog => sub { return 1; },
+        closelog => sub { return 1; },
+        syslog => sub { ($level, $msg) = @_; }
+    });
+
+    $syslog->log("warn", "foo bar", $opts);
+
+    is( $level, "warning", "log level is mapped to priority" );
+    like( $msg, qr/foo bar/, "log message passed" );
 });
 
 subtest("params omit", sub {
@@ -38,16 +47,21 @@ subtest("params omit", sub {
         max_level => "critical",
     };
 
-    my $screen = Log::Handy::Output::Syslog->new(+{ opts => $opts1 });
-    isa_ok( $screen, "Log::Handy::Output::Syslog" );
+    my $syslog = Log::Handy::Output::Syslog->new(+{ opts => $opts1 });
 
-    #lives_ok {
-        #$screen->log("warn", "foo", $opts1);
-    #} "we can omit logopt and facility because of default value";
+    my $guard = mock_guard("Sys::Syslog", +{
+        openlog => sub { return 1; },
+        closelog => sub { return 1; },
+        syslog => sub { return 1; }
+    });
 
-    #dies_ok {
-        #$screen->log("warn", "foo", $opts2);
-    #} "we cannot omit ident because its is mandatory parameter";
+    lives_ok {
+        $syslog->log("warn", "foo", $opts1);
+    } "we can omit logopt and facility because of default value";
+
+    dies_ok {
+        $syslog->log("warn", "foo", $opts2);
+    } "we cannot omit ident because its is mandatory parameter";
 });
 
 done_testing;
